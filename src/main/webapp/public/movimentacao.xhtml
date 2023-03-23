@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Movimentação</title>
+</h:head>
+
+<h:body>
+    <a href="/public/pessoa.xhtml">Pessoa | </a>
+    <a href="/public/conta.xhtml">Conta | </a>
+    <a href="/public/movimentacao.xhtml">Movimentação</a>
+    <br/>
+    <br/>
+
+    <h:form>
+        <p:growl id="msg" showDetail="true" autoUpdate="true" closable="true"/>
+
+        <p:panel header="Cadastro de Movimentação">
+
+            <p:panelGrid columns="2">
+
+                <h:outputLabel for="pessoa" value="Pessoa" />
+                <p:selectOneMenu id="pessoa" value="#{contaBean.pessoaSelecionada}">
+                    <p:ajax update="contas, valor, table2" listener="#{contaBean.atualizarIdPessoaSelecionada}" />
+                    <f:selectItem itemLabel="Selecione" itemValue="#{null}" />
+                    <f:selectItems value="#{contaBean.opcoesPessoasComContas}"  />
+                    <f:converter converterId="pessoaConverter" />
+                </p:selectOneMenu>
+
+                <h:outputLabel value="Número da conta" />
+                <p:selectOneMenu id="contas" value="#{contaBean.contaSelecionada}">
+                    <p:ajax update="table2, valor" listener="#{contaBean.atualizarIdContaSelecionada}" resetValues="false" />
+                    <f:selectItems value="#{contaBean.getOpcoesContas(idPessoa)}" />
+                    <f:converter converterId="contaConverter" />
+                </p:selectOneMenu>
+
+
+                <h:outputLabel for="valor" value="Valor" />
+                <p:inputText id="valor" value="#{contaBean.valor}" required="false" />
+
+                <h:outputLabel for="tipo" value="Tipo de Operação" />
+
+                <p:selectOneMenu id="tipo" value="#{contaBean.tipoOperacao}">
+                    <f:selectItem itemLabel="Depositar" itemValue="Depositar" />
+                    <f:selectItem itemLabel="Sacar" itemValue="Sacar" />
+                </p:selectOneMenu>
+
+            </p:panelGrid>
+
+            <br/>
+
+            <p:commandButton value="Atualizar saldo" action="#{contaBean.atualizarSaldo}" update="msg, table2, valor">
+                <p:ajax update="contas, table2" listener="#{contaBean.atualizarIdPessoaSelecionada}" />
+                <p:confirm header="Confirmation" message="Confirma a atualização do saldo?" icon="pi pi-exclamation-triangle"/>
+            </p:commandButton>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" />
+                <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+            </p:confirmDialog>
+
+        </p:panel>
+
+        <p:separator/>
+
+        <br/>
+
+        <p:dataTable id="table2" var="transacao" value="#{contaBean.getTransacoes()}">
+
+            <p:column headerText="Data">
+                <h:outputText value="#{transacao.data}">
+                    <f:convertDateTime timeZone="GMT-3" pattern="dd/MM/yyyy - HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+            <p:column headerText="Valor">
+                <h:outputText id="valores" value="#{transacao.valor}"  style="#{transacao.tipoOperacao}" >
+                    <f:convertNumber type="currency"  currencySymbol="R$" />
+                </h:outputText>
+            </p:column>
+
+        </p:dataTable>
+    </h:form>
+</h:body>
+</html>
